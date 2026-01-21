@@ -39,7 +39,8 @@ class ConvertorDialog(QDialog):
         layout.addWidget(self.ds_editor)
         
         # Convert Rules Editor
-        self.rules_editor = ConvertRulesEditor(convertor.convert_rules if convertor else [])
+        self.rules_editor = ConvertRulesEditor(convertor.convert_rules if convertor else [], 
+                                               signal_provider=self.ds_editor.get_available_signals)
         layout.addWidget(QLabel("Convert Rules:"))
         layout.addWidget(self.rules_editor)
         

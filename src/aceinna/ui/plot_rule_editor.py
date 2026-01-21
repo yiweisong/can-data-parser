@@ -1,22 +1,26 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QFormLayout, QLineEdit, 
                                QSpinBox, QDoubleSpinBox, QCheckBox, QHBoxLayout, 
-                               QListWidget, QPushButton, QLabel, QInputDialog)
+                               QListWidget, QPushButton, QLabel, QInputDialog, QComboBox)
 from ..models.convert_rule import PlotRule, AxisBinding
 
 class PlotRuleEditor(QWidget):
-    def __init__(self, rule: PlotRule = None):
+    def __init__(self, rule: PlotRule = None, available_signals: list[str] = None):
         super().__init__()
+        self.available_signals = available_signals or []
         
         layout = QVBoxLayout()
         form = QFormLayout()
         
         self.title_edit = QLineEdit()
-        self.x_axis_edit = QLineEdit() # Binding name
+        self.x_axis_edit = QComboBox() # Binding name
+        self.x_axis_edit.setEditable(True)
+        self.x_axis_edit.addItem("") # Empty for Index
+        self.x_axis_edit.addItems(self.available_signals)
         
         if rule:
             self.title_edit.setText(rule.title)
             if rule.x_axis:
-                self.x_axis_edit.setText(rule.x_axis.binding)
+                self.x_axis_edit.setCurrentText(rule.x_axis.binding)
                 
         form.addRow("Title:", self.title_edit)
         form.addRow("X Axis Binding (Empty for Index):", self.x_axis_edit)
@@ -73,7 +77,7 @@ class PlotRuleEditor(QWidget):
         return w
 
     def add_y(self):
-        binding, ok = QInputDialog.getText(self, "Add Y Axis", "Binding Name:")
+        binding, ok = QInputDialog.getItem(self, "Add Y Axis", "Binding Name:", self.available_signals, 0, True)
         if ok and binding:
             self.y_list.addItem(binding)
 
@@ -88,8 +92,8 @@ class PlotRuleEditor(QWidget):
             figure_figsize=(self.fig_w.value(), self.fig_h.value()),
             figure_dpi=self.dpi.value()
         )
-        if self.x_axis_edit.text():
-            rule.x_axis = AxisBinding(binding=self.x_axis_edit.text())
+        if self.x_axis_edit.currentText():
+            rule.x_axis = AxisBinding(binding=self.x_axis_edit.currentText())
         
         y_bindings = []
         for i in range(self.y_list.count()):

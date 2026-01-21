@@ -59,6 +59,8 @@ class MessageMappingDialog(QDialog):
                      
                  if pgn == cid or fid == cid:
                      self.id_combo.setCurrentIndex(i)
+                     # Manually set the message ID on field widget since signal is connected later/or to ensure it runs
+                     self.field_widget.set_current_message_id(fid) 
                      found = True
                      break
             

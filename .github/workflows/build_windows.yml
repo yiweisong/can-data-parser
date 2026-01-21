@@ -20,7 +20,7 @@ jobs:
         pip install pyinstaller
     - name: Build with PyInstaller
       run: |
-        pyinstaller build.spec
+        pyinstaller --clean --noconfirm build.spec
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:

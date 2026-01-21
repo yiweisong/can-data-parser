@@ -106,3 +106,13 @@ class DataSourceEditor(QWidget):
                 pgn_mappings=mappings,
                 source_address_filters=sas
             )
+
+    def get_available_signals(self) -> list[str]:
+        # Return a list of all defined field names
+        signals = []
+        mappings = self.mapping_widget.get_mappings()
+        for m in mappings:
+            for f in m.fields:
+                if f.name:
+                    signals.append(f.name)
+        return sorted(list(set(signals)))

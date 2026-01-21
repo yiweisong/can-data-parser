@@ -1,3 +1,6 @@
+import os
+import subprocess
+import platform
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QComboBox, QPushButton, QLineEdit, QFileDialog, 
                                QProgressBar, QMessageBox)
@@ -8,6 +11,7 @@ class HomePage(QWidget):
     def __init__(self, config_store):
         super().__init__()
         self.config_store = config_store
+        self.config_store.add_observer(self.refresh_lists)
         self.process = None
         self.init_ui()
 
@@ -42,9 +46,12 @@ class HomePage(QWidget):
         self.btn_cancel = QPushButton("Cancel")
         self.btn_cancel.clicked.connect(self.cancel_process)
         self.btn_cancel.setEnabled(False)
-        
+        self.btn_open_result = QPushButton("Open Result Folder")
+        self.btn_open_result.clicked.connect(self.open_result_folder)
+
         btn_layout.addWidget(self.btn_start)
         btn_layout.addWidget(self.btn_cancel)
+        btn_layout.addWidget(self.btn_open_result) # Added button
         layout.addLayout(btn_layout)
         
         # 5. Status
@@ -86,6 +93,26 @@ class HomePage(QWidget):
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Data File", "", "Data Files (*.xlsx *.csv);;All Files (*)")
         if file_path:
             self.line_file_path.setText(file_path)
+
+    def open_result_folder(self):
+        file_path = self.line_file_path.text()
+        convertor = self.combo_convertor.currentData()
+        
+        path = None
+        if convertor and hasattr(convertor, 'result_folder') and convertor.result_folder:
+            path = convertor.result_folder
+        elif file_path:
+             path = os.path.join(os.path.dirname(file_path), f"{convertor.name}_results" if convertor else "results")
+        
+        if path and os.path.exists(path):
+             if platform.system() == "Windows":
+                 os.startfile(path)
+             elif platform.system() == "Darwin":
+                 subprocess.Popen(["open", path])
+             else:
+                 subprocess.Popen(["xdg-open", path])
+        else:
+             QMessageBox.warning(self, "Warning", f"Result directory not found or cannot be determined.\nPath: {path}")
 
     def start_process(self):
         convertor = self.combo_convertor.currentData()

@@ -4,8 +4,9 @@ from PySide6.QtWidgets import (QWidget, QVBoxLayout, QFormLayout, QLineEdit,
 from ..models.convert_rule import DataListRule, DataListField
 
 class DataListRuleEditor(QWidget):
-    def __init__(self, rule: DataListRule = None):
+    def __init__(self, rule: DataListRule = None, available_signals: list[str] = None):
         super().__init__()
+        self.available_signals = available_signals or []
         
         layout = QVBoxLayout()
         form = QFormLayout()
@@ -44,7 +45,7 @@ class DataListRuleEditor(QWidget):
         self.setLayout(layout)
 
     def add_field(self):
-        binding, ok = QInputDialog.getText(self, "Add Field", "Binding Name:")
+        binding, ok = QInputDialog.getItem(self, "Add Field", "Binding Name:", self.available_signals, 0, True)
         if ok and binding:
             self.field_list.addItem(binding)
 

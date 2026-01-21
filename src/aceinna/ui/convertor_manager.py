@@ -1,1 +1,65 @@
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget,                                QPushButton, QMessageBox)from .convertor_dialog import ConvertorDialogclass ConvertorManager(QWidget):    def __init__(self, config_store):        super().__init__()        self.config_store = config_store                layout = QVBoxLayout()                self.list_widget = QListWidget()        layout.addWidget(self.list_widget)                btn_layout = QHBoxLayout()        self.btn_add = QPushButton("Add")        self.btn_edit = QPushButton("Edit")        self.btn_delete = QPushButton("Delete")                self.btn_add.clicked.connect(self.add_convertor)        self.btn_edit.clicked.connect(self.edit_convertor)        self.btn_delete.clicked.connect(self.delete_convertor)                btn_layout.addWidget(self.btn_add)        btn_layout.addWidget(self.btn_edit)        btn_layout.addWidget(self.btn_delete)        layout.addLayout(btn_layout)                self.setLayout(layout)        self.refresh_list()    def refresh_list(self):        self.list_widget.clear()        for c in self.config_store.convertors:            self.list_widget.addItem(c.name)    def add_convertor(self):        dialog = ConvertorDialog(self)        if dialog.exec():            new_c = dialog.get_convertor()            self.config_store.convertors.append(new_c)            self.config_store.save()            self.refresh_list()    def edit_convertor(self):        row = self.list_widget.currentRow()        if row < 0: return                c = self.config_store.convertors[row]        dialog = ConvertorDialog(self, c)        if dialog.exec():            updated_c = dialog.get_convertor()            self.config_store.convertors[row] = updated_c            self.config_store.save()            self.refresh_list()    def delete_convertor(self):        row = self.list_widget.currentRow()        if row < 0: return                if QMessageBox.question(self, "Delete", "Are you sure?") == QMessageBox.Yes:            del self.config_store.convertors[row]            self.config_store.save()            self.refresh_list()
+from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
+                               QPushButton, QMessageBox)
+from .convertor_dialog import ConvertorDialog
+
+class ConvertorManager(QWidget):
+    def __init__(self, config_store):
+        super().__init__()
+        self.config_store = config_store
+        self.config_store.add_observer(self.refresh_list)
+        
+        layout = QVBoxLayout()
+        
+        self.list_widget = QListWidget()
+        layout.addWidget(self.list_widget)
+        
+        btn_layout = QHBoxLayout()
+        self.btn_add = QPushButton("Add")
+        self.btn_edit = QPushButton("Edit")
+        self.btn_delete = QPushButton("Delete")
+        
+        self.btn_add.clicked.connect(self.add_convertor)
+        self.btn_edit.clicked.connect(self.edit_convertor)
+        self.btn_delete.clicked.connect(self.delete_convertor)
+        
+        btn_layout.addWidget(self.btn_add)
+        btn_layout.addWidget(self.btn_edit)
+        btn_layout.addWidget(self.btn_delete)
+        layout.addLayout(btn_layout)
+        
+        self.setLayout(layout)
+        self.refresh_list()
+
+    def refresh_list(self):
+        self.list_widget.clear()
+        for c in self.config_store.convertors:
+            self.list_widget.addItem(c.name)
+
+    def add_convertor(self):
+        dialog = ConvertorDialog(self)
+        if dialog.exec():
+            new_c = dialog.get_convertor()
+            self.config_store.convertors.append(new_c)
+            self.config_store.save()
+            self.refresh_list()
+
+    def edit_convertor(self):
+        row = self.list_widget.currentRow()
+        if row < 0: return
+        
+        c = self.config_store.convertors[row]
+        dialog = ConvertorDialog(self, c)
+        if dialog.exec():
+            updated_c = dialog.get_convertor()
+            self.config_store.convertors[row] = updated_c
+            self.config_store.save()
+            self.refresh_list()
+
+    def delete_convertor(self):
+        row = self.list_widget.currentRow()
+        if row < 0: return
+        
+        if QMessageBox.question(self, "Delete", "Are you sure?") == QMessageBox.Yes:
+            del self.config_store.convertors[row]
+            self.config_store.save()
+            self.refresh_list()

@@ -7,6 +7,7 @@ class FetchRuleManager(QWidget):
     def __init__(self, config_store):
         super().__init__()
         self.config_store = config_store
+        self.config_store.add_observer(self.refresh_list)
         
         layout = QVBoxLayout()
         
