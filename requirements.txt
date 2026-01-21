@@ -1,0 +1,6 @@
+PySide6
+matplotlib
+pandas
+cantools
+openpyxl
+pyinstaller

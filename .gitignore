@@ -1,0 +1,5 @@
+.venv/
+*.dbc
+docs/
+__pycache__/
+data/
