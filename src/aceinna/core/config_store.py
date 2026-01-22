@@ -95,6 +95,7 @@ class ConfigStore:
                 c.convert_rules.append(rule)
             elif rd['type'] == 'data_list':
                 rule = DataListRule(
+                    title=rd.get('title', ''),
                     delimiter=rd.get('delimiter', ','),
                     include_header=rd.get('include_header', True)
                 )

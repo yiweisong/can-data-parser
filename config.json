@@ -5,7 +5,7 @@
             "data_source": {
                 "name": "DataSource",
                 "type": "j1939",
-                "dbc_file_path": "/Users/songyiwei/projects/can-data-parser/IMU400RI.dbc",
+                "dbc_file_path": "./IMU400RI.dbc",
                 "pgn_mappings": [
                     {
                         "identifier": 61482,
@@ -403,7 +403,7 @@
                     "legend_fontsize": 8
                 }
             ],
-            "result_folder": "/Users/songyiwei/projects/can-data-parser/data"
+            "result_folder": "./data"
         }
     ],
     "fetch_rules": [

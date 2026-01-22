@@ -12,6 +12,14 @@ class DataListRuleEditor(QWidget):
         self.available_signals_grouped = available_signals_grouped or {}
         
         main_layout = QVBoxLayout()
+
+        # 1. Title
+        title_form = QFormLayout()
+        self.title_edit = QLineEdit()
+        if rule:
+             self.title_edit.setText(rule.title)
+        title_form.addRow("Title (output filename):", self.title_edit)
+        main_layout.addLayout(title_form)
         
         # Binding Area (Splitter)
         splitter = QSplitter(Qt.Horizontal)
@@ -55,9 +63,6 @@ class DataListRuleEditor(QWidget):
         
         # Options
         form = QFormLayout()
-        self.title_edit = QLineEdit() # New Title field
-        if rule:
-             self.title_edit.setText(rule.title)
              
         self.delimiter = QLineEdit()
         self.delimiter.setText(",")
@@ -68,7 +73,6 @@ class DataListRuleEditor(QWidget):
             self.delimiter.setText(rule.delimiter)
             self.header.setChecked(rule.include_header)
             
-        form.addRow("Title (output filename):", self.title_edit)
         form.addRow("Delimiter:", self.delimiter)
         form.addRow("Header:", self.header)
         main_layout.addWidget(QLabel("Options:"))
