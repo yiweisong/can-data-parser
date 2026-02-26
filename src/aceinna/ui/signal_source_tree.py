@@ -27,7 +27,13 @@ class SignalSourceTree(QTreeWidget):
         if items:
             # We only support dragging one item or multiple? 
             # The requirement says "User could drag multiple signals", so let's check selection mode
-            texts = [item.text(0) for item in items if item.parent()] # Only signals, not groups
+            texts = []
+            for item in items:
+                if item.parent(): # Only signals, not groups
+                    signal_name = item.text(0)
+                    group_name = item.parent().text(0)
+                    texts.append(f"{signal_name}|{group_name}")
+            
             mime_data.setText("\n".join(texts)) 
-            # We use plain text for simplicity: "SignalName"
+            # We use plain text for simplicity: "SignalName|GroupName"
         return mime_data

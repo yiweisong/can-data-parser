@@ -23,11 +23,14 @@ class DataLoader:
             rule.message_data_col_index
         ]
         
+        # Determine skiprows based on rule
+        skiprows = 1 if getattr(rule, 'ignore_first_row', True) else 0
+
         # Read file
         if rule.file_type == 'xlsx':
-            df = pd.read_excel(file_path, header=None) # Assuming no header or we handle it by index
+            df = pd.read_excel(file_path, header=None, skiprows=skiprows) # Assuming no header or we handle it by index
         elif rule.file_type == 'csv':
-            df = pd.read_csv(file_path, header=None)
+            df = pd.read_csv(file_path, header=None, skiprows=skiprows)
         else:
             raise ValueError(f"Unsupported file type: {rule.file_type}")
 

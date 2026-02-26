@@ -217,13 +217,16 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_Pitch_Angular_Rate"
+                            "binding": "Aceinna_Pitch_Angular_Rate",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Roll_Angular_Rate"
+                            "binding": "Aceinna_Roll_Angular_Rate",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Yaw_Angular_Rate"
+                            "binding": "Aceinna_Yaw_Angular_Rate",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -243,32 +246,33 @@
                     "title": "Combined",
                     "fields": [
                         {
-                            "binding": "Aceinna_Yaw_Angular_Rate"
+                            "binding": "Aceinna_Yaw_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
                         },
                         {
-                            "binding": "Aceinna_Roll_Angular_Rate"
+                            "binding": "Aceinna_Roll_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
                         },
                         {
-                            "binding": "Aceinna_Pitch_Angular_Rate"
+                            "binding": "Aceinna_Pitch_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
                         },
                         {
-                            "binding": "Aceinna_AccY"
+                            "binding": "Aceinna_AccY",
+                            "message_id": "ID/PGN: 61485"
                         },
                         {
-                            "binding": "Aceinna_AccZ"
+                            "binding": "Aceinna_AccZ",
+                            "message_id": "ID/PGN: 61485"
                         },
                         {
-                            "binding": "Aceinna_AccX"
-                        },
-                        {
-                            "binding": "Aceinna_Pitch"
-                        },
-                        {
-                            "binding": "Aceinna_Roll"
+                            "binding": "Aceinna_AccX",
+                            "message_id": "ID/PGN: 61485"
                         }
                     ],
                     "delimiter": ",",
-                    "include_header": true
+                    "include_header": true,
+                    "merge_rule": "Group Merge"
                 },
                 {
                     "type": "plot",
@@ -276,13 +280,16 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_Roll_SSI"
+                            "binding": "Aceinna_Roll_SSI",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_GyroY_SSI"
+                            "binding": "Aceinna_GyroY_SSI",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Pitch_SSI"
+                            "binding": "Aceinna_Pitch_SSI",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -303,13 +310,16 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_Yaw_HR"
+                            "binding": "Aceinna_Yaw_HR",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Roll_HR"
+                            "binding": "Aceinna_Roll_HR",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Pitch_HR"
+                            "binding": "Aceinna_Pitch_HR",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -330,13 +340,16 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_AccX"
+                            "binding": "Aceinna_AccX",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_AccZ"
+                            "binding": "Aceinna_AccZ",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_AccY"
+                            "binding": "Aceinna_AccY",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -357,13 +370,16 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_AccX_HR"
+                            "binding": "Aceinna_AccX_HR",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_AccY_HR"
+                            "binding": "Aceinna_AccY_HR",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_AccZ_HR"
+                            "binding": "Aceinna_AccZ_HR",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -384,10 +400,12 @@
                     "x_axis": null,
                     "y_axes": [
                         {
-                            "binding": "Aceinna_Roll"
+                            "binding": "Aceinna_Roll",
+                            "message_id": ""
                         },
                         {
-                            "binding": "Aceinna_Pitch"
+                            "binding": "Aceinna_Pitch",
+                            "message_id": ""
                         }
                     ],
                     "figure_figsize": [
@@ -410,9 +428,10 @@
         {
             "name": "CSV Mapping",
             "file_type": "csv",
-            "message_id_col_index": 5,
-            "message_data_col_index": 9,
-            "timestamp_col_index": 0
+            "message_id_col_index": 3,
+            "message_data_col_index": 7,
+            "timestamp_col_index": 0,
+            "ignore_first_row": true
         }
     ]
 }

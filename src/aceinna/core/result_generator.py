@@ -122,6 +122,14 @@ class ResultGenerator:
 
     @staticmethod
     def _generate_data_list(results: Dict[str, pd.Series], rule: DataListRule, folder: str, index: int, suffix: str = ""):
+        # Check rule type for merging
+        merge_rule = getattr(rule, 'merge_rule', 'Forward Fill')
+        
+        if merge_rule == 'Group Merge':
+             ResultGenerator._generate_group_merge_list(results, rule, folder, index, suffix)
+             return
+
+        # Default Forward Fill Logic
         # Merge all required fields into one DataFrame
         series_list = []
         for field in rule.fields:
@@ -154,6 +162,133 @@ class ResultGenerator:
         
         filename = f"{safe_title}{suffix}.csv"
         df.to_csv(
+            os.path.join(folder, filename), 
+            sep=rule.delimiter, 
+            index=False, 
+            header=rule.include_header
+        )
+
+    @staticmethod
+    def _generate_group_merge_list(results: Dict[str, pd.Series], rule: DataListRule, folder: str, index: int, suffix: str = ""):
+        # 1. Prepare data
+        series_list = []
+        for field in rule.fields:
+            if field.binding in results:
+                s = results[field.binding].copy()
+                s.name = field.binding
+                series_list.append(s)
+        
+        if not series_list: return
+
+        sig_to_msg = {f.binding: f.message_id for f in rule.fields}
+        ordered_msg_ids = []
+        seen = set()
+        for f in rule.fields:
+            if f.message_id and f.message_id not in seen:
+                ordered_msg_ids.append(f.message_id)
+                seen.add(f.message_id)
+
+        if not ordered_msg_ids:
+            # Fallback to standard if no message IDs
+            ResultGenerator._generate_data_list(results, rule, folder, index, suffix)
+            return
+
+        start_msg_id = ordered_msg_ids[0]
+
+        # 2. Combine all series into a single sorted event stream
+        # Stack approach is clean: index(timestamp), column(signal) -> value
+        full_df = pd.concat(series_list, axis=1)
+        # Convert to long format: [timestamp, signal, value]
+        # Reset index to make timestamp a column
+        full_df.index.name = 'timestamp'
+        stacked = full_df.stack().reset_index()
+        stacked.columns = ['timestamp', 'signal', 'value']
+        stacked.sort_values('timestamp', inplace=True)
+
+        # 3. Process events
+        output_rows = []
+        current_row = {}
+        current_ts = None
+        
+        # Performance optimization: iterate purely on values
+        # Convert to list of dicts/tuples for speed
+        events = stacked.to_dict('records')
+        
+        for event in events:
+            ts = event['timestamp']
+            sig = event['signal']
+            val = event['value']
+            mid = sig_to_msg.get(sig)
+
+            if mid == start_msg_id and ts == current_row['timestamp'] if 'timestamp' in current_row else None:
+                 # New cycle detect: same start signal appears again
+                 # Or any signal from start_msg_id appears again?
+                 # Simplest: If we have pending data for this exact signal (or any signal from start_msg_id?), FLUSH.
+                 # Actually, "if the signals belong to the first message in the group, we will start a new line"
+                 # This implies ANY signal from start_msg_id triggers a new line.
+                 current_row[sig] = val
+                 continue
+
+            if mid == start_msg_id and (current_ts is None or ts > current_ts):
+                # Check if we should flush previous row
+                # Condition: "start a new line"
+                # If current_row has data (even if incomplete), usage of start_msg_id implies a NEW begin.
+                if current_row:
+                    output_rows.append(current_row)
+                    current_row = {}
+                
+                # Start new
+                if 'timestamp' not in current_row:
+                    current_row['timestamp'] = ts
+                    current_ts = ts
+                current_row[sig] = val
+            
+            else:
+                # Other messages
+                # "If the signals belong to different messages, we will check if the timestamp is less than the previous line"
+                # This suggests handling out-of-order? But our stream is sorted by timestamp.
+                # So timestamp is always >= previous event.
+                # Just add to current row.
+                # If orphan (no start_msg_id seen yet), we can optionally start a row or discard.
+                # Let's start a row to capture data.
+                if not current_row:
+                    current_row = {'timestamp': ts}
+                
+                # Check for conflict? (Signal already present)
+                # If sig in current_row, it means we have a duplicate signal in one cycle (e.g. 100Hz vs 10Hz).
+                # Group Merge implies 1-to-1 mapping of messages in a cycle.
+                # If we get another Msg2 before the next Msg1, it usually means 
+                # a) The cycle is faster than we thought
+                # b) Packet loss of Msg1
+                # c) Multiple signals in Msg2? (Distinct signals)
+                
+                if sig in current_row:
+                    # Signal collision! 
+                    # This implies the previous cycle is "done" (implicitly) or broken.
+                    # Flush and start new?
+                    # Or overwrite? Overwrite loses data.
+                    # Flush seems safer.
+                    output_rows.append(current_row)
+                    current_row = {'timestamp': ts}
+                    
+                current_row[sig] = val
+
+        # Flush final
+        if current_row:
+             output_rows.append(current_row)
+
+        # 4. Construct Result DataFrame
+        res_df = pd.DataFrame(output_rows)
+        
+        # Ensure column order
+        cols = ['timestamp'] + [f.binding for f in rule.fields]
+        # Reindex to add missing columns (NaN) and sort
+        res_df = res_df.reindex(columns=cols)
+        
+        # Output
+        safe_title = rule.title.replace(' ', '_') if getattr(rule, 'title', '') else f"datalist_{index}"
+        filename = f"{safe_title}{suffix}.csv"
+        res_df.to_csv(
             os.path.join(folder, filename), 
             sep=rule.delimiter, 
             index=False, 

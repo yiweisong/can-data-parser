@@ -3,8 +3,9 @@ from typing import Literal
 
 @dataclass
 class DataSourceFetchRule:
-    name: str
-    file_type: Literal['xlsx', 'csv']
-    message_id_col_index: int
-    message_data_col_index: int
-    timestamp_col_index: int
+    name: str = ""
+    file_type: Literal['xlsx', 'csv'] = 'csv'
+    message_id_col_index: int = 1
+    message_data_col_index: int = 2
+    timestamp_col_index: int = 0
+    ignore_first_row: bool = True

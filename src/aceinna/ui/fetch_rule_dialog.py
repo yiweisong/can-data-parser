@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QFormLayout, QLineEdit, 
-                               QComboBox, QSpinBox, QDialogButtonBox)
+                               QComboBox, QSpinBox, QDialogButtonBox, QCheckBox)
 from ..models.fetch_rule import DataSourceFetchRule
 
 class FetchRuleDialog(QDialog):
@@ -21,6 +21,9 @@ class FetchRuleDialog(QDialog):
         self.msg_data_col.setRange(0, 100)
         self.time_col = QSpinBox()
         self.time_col.setRange(0, 100)
+
+        self.ignore_first_row = QCheckBox("Ignore title row")
+        self.ignore_first_row.setChecked(True)
         
         if rule:
             self.name_edit.setText(rule.name)
@@ -28,6 +31,7 @@ class FetchRuleDialog(QDialog):
             self.msg_id_col.setValue(rule.message_id_col_index)
             self.msg_data_col.setValue(rule.message_data_col_index)
             self.time_col.setValue(rule.timestamp_col_index)
+            self.ignore_first_row.setChecked(rule.ignore_first_row)
             
         form.addRow("Name:", self.name_edit)
         form.addRow("File Type:", self.type_combo)
@@ -36,6 +40,7 @@ class FetchRuleDialog(QDialog):
         form.addRow("Timestamp Column Index:", self.time_col)
         
         layout.addLayout(form)
+        layout.addWidget(self.ignore_first_row)
         
         buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
         buttons.accepted.connect(self.accept)
@@ -50,5 +55,6 @@ class FetchRuleDialog(QDialog):
             file_type=self.type_combo.currentText(),
             message_id_col_index=self.msg_id_col.value(),
             message_data_col_index=self.msg_data_col.value(),
-            timestamp_col_index=self.time_col.value()
+            timestamp_col_index=self.time_col.value(),
+            ignore_first_row=self.ignore_first_row.isChecked()
         )

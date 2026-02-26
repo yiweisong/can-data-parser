@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QFormLayout, QLineEdit, 
                                QSpinBox, QDoubleSpinBox, QCheckBox, QHBoxLayout, 
-                               QListWidget, QPushButton, QLabel, QInputDialog, QComboBox, 
+                               QListWidget, QListWidgetItem, QPushButton, QLabel, QInputDialog, QComboBox, 
                                QSplitter, QAbstractItemView)
 from PySide6.QtCore import Qt
 from ..models.convert_rule import PlotRule, AxisBinding
@@ -42,13 +42,26 @@ class DropListWidget(QListWidget):
         if event.mimeData().hasText():
             event.acceptProposedAction()
 
+    def add_binding(self, binding: str, msg_id: str = ""):
+        # Check if already exists? maybe not needed
+        display_text = f"{binding} [{msg_id}]" if msg_id else binding
+        item = QListWidgetItem(display_text)
+        item.setData(Qt.UserRole, binding)
+        item.setData(Qt.UserRole + 1, msg_id)
+        self.addItem(item)
+        
     def dropEvent(self, event):
         text = event.mimeData().text()
         for line in text.split("\n"):
-            if line.strip():
-                # Check for duplicates? Or allow?
-                # Ideally we want unique bindings per list usually, but let's just add
-                self.addItem(line.strip())
+            line = line.strip()
+            if line:
+                if '|' in line:
+                    parts = line.split('|')
+                    binding = parts[0]
+                    msg_id = parts[1] if len(parts) > 1 else ""
+                    self.add_binding(binding, msg_id)
+                else:
+                    self.add_binding(line)
         event.acceptProposedAction()
         
     def keyPressEvent(self, event):
@@ -107,7 +120,9 @@ class PlotRuleEditor(QWidget):
         self.y_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         if rule:
             for y in rule.y_axes:
-                self.y_list.addItem(y.binding)
+                # Assuming y is AxisBinding with potential message_id
+                msg = getattr(y, 'message_id', '') if y else ''
+                self.y_list.add_binding(y.binding, msg)
         y_layout.addWidget(self.y_list)
         
         # Helper buttons for Y Axis (Delete, Up, Down)
@@ -192,7 +207,15 @@ class PlotRuleEditor(QWidget):
         
         y_bindings = []
         for i in range(self.y_list.count()):
-            y_bindings.append(AxisBinding(binding=self.y_list.item(i).text()))
+            item = self.y_list.item(i)
+            # Prefer UserRole if available (for message ID support)
+            binding = item.data(Qt.UserRole)
+            if not binding:
+                binding = item.text()
+            
+            msg = item.data(Qt.UserRole + 1) or ""
+            y_bindings.append(AxisBinding(binding=binding, message_id=msg))
+            
         rule.y_axes = y_bindings
         
         return rule

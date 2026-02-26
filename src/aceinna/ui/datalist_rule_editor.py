@@ -1,6 +1,6 @@
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QFormLayout, QLineEdit, 
                                QCheckBox, QHBoxLayout, QListWidget, QPushButton, 
-                               QLabel, QInputDialog, QSplitter, QAbstractItemView)
+                               QLabel, QInputDialog, QSplitter, QAbstractItemView, QComboBox)
 from PySide6.QtCore import Qt
 from ..models.convert_rule import DataListRule, DataListField
 from .signal_source_tree import SignalSourceTree
@@ -38,7 +38,8 @@ class DataListRuleEditor(QWidget):
         self.field_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         if rule:
             for f in rule.fields:
-                self.field_list.addItem(f.binding)
+                msg = getattr(f, 'message_id', '')
+                self.field_list.add_binding(f.binding, msg)
         right_layout.addWidget(self.field_list)
 
         # Helper buttons
@@ -64,15 +65,20 @@ class DataListRuleEditor(QWidget):
         # Options
         form = QFormLayout()
              
+        self.merge_rule = QComboBox()
+        self.merge_rule.addItems(["Forward Fill", "Group Merge"])
+        
         self.delimiter = QLineEdit()
         self.delimiter.setText(",")
         self.header = QCheckBox("Include Header")
         self.header.setChecked(True)
         
         if rule:
+            self.merge_rule.setCurrentText(rule.merge_rule)
             self.delimiter.setText(rule.delimiter)
             self.header.setChecked(rule.include_header)
             
+        form.addRow("Merge Rule:", self.merge_rule)
         form.addRow("Delimiter:", self.delimiter)
         form.addRow("Header:", self.header)
         main_layout.addWidget(QLabel("Options:"))
@@ -98,11 +104,27 @@ class DataListRuleEditor(QWidget):
         rule = DataListRule(
             title=self.title_edit.text(),
             delimiter=self.delimiter.text(),
-            include_header=self.header.isChecked()
+            include_header=self.header.isChecked(),
+            merge_rule=self.merge_rule.currentText()
         )
         fields = []
         for i in range(self.field_list.count()):
-            fields.append(DataListField(binding=self.field_list.item(i).text()))
+            item = self.field_list.item(i)
+            binding = item.text()
+            msg = ""
+            
+            # Use UserRole if present (it should be if added via add_binding or drop)
+            if item.data(Qt.UserRole):
+                binding = item.data(Qt.UserRole)
+                msg = item.data(Qt.UserRole + 1) or ""
+            else:
+                # Fallback parsing (e.g. if older items without UserRole exist, but we used add_binding above)
+                if '|' in binding:
+                     parts = binding.split('|')
+                     binding = parts[0].strip()
+                     msg = parts[1].strip() if len(parts) > 1 else ""
+
+            fields.append(DataListField(binding=binding, message_id=msg))
         rule.fields = fields
         
         return rule

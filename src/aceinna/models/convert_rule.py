@@ -8,6 +8,7 @@ class ConvertRule:
 @dataclass
 class AxisBinding:
     binding: str # data field name
+    message_id: str = ""
 
 @dataclass
 class PlotRule(ConvertRule):
@@ -30,6 +31,7 @@ class PlotRule(ConvertRule):
 @dataclass
 class DataListField:
     binding: str
+    message_id: str = ""
 
 @dataclass
 class DataListRule(ConvertRule):
@@ -37,4 +39,5 @@ class DataListRule(ConvertRule):
     fields: List[DataListField] = field(default_factory=list)
     delimiter: str = ","
     include_header: bool = True
+    merge_rule: Literal['Forward Fill', 'Group Merge'] = 'Forward Fill'
     type: Literal['data_list'] = 'data_list'
