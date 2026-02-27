@@ -4,6 +4,9 @@ import matplotlib.pyplot as plt
 from typing import Dict, List
 from ..models.convert_rule import PlotRule, DataListRule, ConvertRule
 
+def init_data_row(signal_dict):
+    return {key: None for key in signal_dict}
+
 class ResultGenerator:
     @staticmethod
     def generate(results: Dict[str, pd.Series], rules: List[ConvertRule], output_folder: str):
@@ -181,6 +184,7 @@ class ResultGenerator:
         if not series_list: return
 
         sig_to_msg = {f.binding: f.message_id for f in rule.fields}
+
         ordered_msg_ids = []
         seen = set()
         for f in rule.fields:
@@ -207,7 +211,7 @@ class ResultGenerator:
 
         # 3. Process events
         output_rows = []
-        current_row = {}
+        current_row = init_data_row(sig_to_msg)
         current_ts = None
         
         # Performance optimization: iterate purely on values
@@ -221,61 +225,32 @@ class ResultGenerator:
             mid = sig_to_msg.get(sig)
 
             if mid == start_msg_id and ts == current_row['timestamp'] if 'timestamp' in current_row else None:
-                 # New cycle detect: same start signal appears again
-                 # Or any signal from start_msg_id appears again?
-                 # Simplest: If we have pending data for this exact signal (or any signal from start_msg_id?), FLUSH.
-                 # Actually, "if the signals belong to the first message in the group, we will start a new line"
-                 # This implies ANY signal from start_msg_id triggers a new line.
-                 current_row[sig] = val
-                 continue
+                current_row[sig] = val
+                continue
 
             if mid == start_msg_id and (current_ts is None or ts > current_ts):
-                # Check if we should flush previous row
-                # Condition: "start a new line"
-                # If current_row has data (even if incomplete), usage of start_msg_id implies a NEW begin.
-                if current_row:
-                    output_rows.append(current_row)
-                    current_row = {}
-                
-                # Start new
                 if 'timestamp' not in current_row:
                     current_row['timestamp'] = ts
                     current_ts = ts
+                else:
+                    # check if any fields are None except timestamp? If so, skip this row
+                    if any(v is None for k, v in current_row.items() if k != 'timestamp'):
+                        current_row = None
+
+                    if current_row:
+                        output_rows.append(current_row)
+                        current_row = init_data_row(sig_to_msg) # Start fresh for new cycle    
+                        current_row['timestamp'] = ts
+                        current_ts = ts
+
                 current_row[sig] = val
-            
             else:
-                # Other messages
-                # "If the signals belong to different messages, we will check if the timestamp is less than the previous line"
-                # This suggests handling out-of-order? But our stream is sorted by timestamp.
-                # So timestamp is always >= previous event.
-                # Just add to current row.
-                # If orphan (no start_msg_id seen yet), we can optionally start a row or discard.
-                # Let's start a row to capture data.
-                if not current_row:
-                    current_row = {'timestamp': ts}
-                
-                # Check for conflict? (Signal already present)
-                # If sig in current_row, it means we have a duplicate signal in one cycle (e.g. 100Hz vs 10Hz).
-                # Group Merge implies 1-to-1 mapping of messages in a cycle.
-                # If we get another Msg2 before the next Msg1, it usually means 
-                # a) The cycle is faster than we thought
-                # b) Packet loss of Msg1
-                # c) Multiple signals in Msg2? (Distinct signals)
-                
                 if sig in current_row:
-                    # Signal collision! 
-                    # This implies the previous cycle is "done" (implicitly) or broken.
-                    # Flush and start new?
-                    # Or overwrite? Overwrite loses data.
-                    # Flush seems safer.
-                    output_rows.append(current_row)
-                    current_row = {'timestamp': ts}
-                    
-                current_row[sig] = val
+                    current_row[sig] = val
 
         # Flush final
         if current_row:
-             output_rows.append(current_row)
+            output_rows.append(current_row)
 
         # 4. Construct Result DataFrame
         res_df = pd.DataFrame(output_rows)
