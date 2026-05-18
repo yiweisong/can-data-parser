@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
     
     def show_about(self):
         QMessageBox.about(self, "About Application",
-                          "Can Data Parser v1.0.3\n\n")
+                          "Can Data Parser v1.1.1\n\n")
     
     def show_import_dialog(self):
         self.io_manager.import_config()
