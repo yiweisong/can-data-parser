@@ -235,7 +235,7 @@ class ResultGenerator:
         # 3. Process events
         output_rows = []
         current_row = init_data_row(sig_to_msg)
-        last_ts = -1
+        last_ts = None
         
         # Performance optimization: iterate purely on values
         # Convert to list of dicts/tuples for speed
@@ -247,7 +247,7 @@ class ResultGenerator:
             val = event['value']
             mid = sig_to_msg.get(sig)
 
-            if mid == start_msg_id and ts > last_ts:
+            if mid == start_msg_id and (last_ts is None or ts > last_ts):
                 if 'timestamp' not in current_row: # First ever row
                     current_row['timestamp'] = ts
                     current_row[sig] = val
