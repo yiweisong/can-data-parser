@@ -2,12 +2,35 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Dict, List
+import logging
+from logging.handlers import RotatingFileHandler
+from datetime import datetime
 from ..models.convert_rule import PlotRule, DataListRule, ConvertRule
 
 def init_data_row(signal_dict):
     return {key: None for key in signal_dict}
 
 class ResultGenerator:
+    _logger = None
+
+    @classmethod
+    def _get_logger(cls):
+        if cls._logger is None:
+            if not os.path.exists('logs'):
+                os.makedirs('logs')
+            timestamp = datetime.now().strftime('%Y%m%d')
+            log_file = os.path.join('logs', f'result_generator_{timestamp}.log')
+            
+            cls._logger = logging.getLogger('ResultGenerator')
+            cls._logger.setLevel(logging.WARNING)
+            
+            handler = RotatingFileHandler(log_file, maxBytes=5*1024*1024, backupCount=5)
+            formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+            handler.setFormatter(formatter)
+            
+            cls._logger.addHandler(handler)
+        return cls._logger
+
     @staticmethod
     def generate(results: Dict[str, pd.Series], rules: List[ConvertRule], output_folder: str):
         if not os.path.exists(output_folder):
@@ -52,7 +75,7 @@ class ResultGenerator:
                     elif rule.type == 'data_list':
                         ResultGenerator._generate_data_list(group_results, rule, output_folder, i, suffix)
                 except Exception as e:
-                    print(f"Error generating result for rule {i} suffix {suffix}: {e}")
+                    ResultGenerator._get_logger().exception(f"Error generating result for rule {i} suffix {suffix}: {e}")
 
     @staticmethod
     def _generate_plot(results: Dict[str, pd.Series], rule: PlotRule, folder: str, index: int, suffix: str = ""):
@@ -212,7 +235,7 @@ class ResultGenerator:
         # 3. Process events
         output_rows = []
         current_row = init_data_row(sig_to_msg)
-        current_ts = None
+        last_ts = -1
         
         # Performance optimization: iterate purely on values
         # Convert to list of dicts/tuples for speed
@@ -224,33 +247,31 @@ class ResultGenerator:
             val = event['value']
             mid = sig_to_msg.get(sig)
 
-            if mid == start_msg_id and ts == current_row['timestamp'] if 'timestamp' in current_row else None:
-                current_row[sig] = val
-                continue
-
-            if mid == start_msg_id and (current_ts is None or ts > current_ts):
-                if 'timestamp' not in current_row:
+            if mid == start_msg_id and ts > last_ts:
+                if 'timestamp' not in current_row: # First ever row
                     current_row['timestamp'] = ts
-                    current_ts = ts
+                    current_row[sig] = val
+                    last_ts = ts
                 else:
-                    # check if any fields are None except timestamp? If so, skip this row
+                    # check if any fields are None except timestamp. If so, skip this row
                     if any(v is None for k, v in current_row.items() if k != 'timestamp'):
-                        current_row = None
-
-                    if current_row:
+                        #print(f"Skipping incomplete row at timestamp {current_row['timestamp']}")
+                        ResultGenerator._get_logger().warning(f"Skipping incomplete row at timestamp {current_row['timestamp']}")
+                    else:
                         output_rows.append(current_row)
-                        current_row = init_data_row(sig_to_msg) # Start fresh for new cycle    
-                        current_row['timestamp'] = ts
-                        current_ts = ts
-
-                current_row[sig] = val
+                        
+                    current_row = init_data_row(sig_to_msg) # Start fresh for new cycle
+                    current_row['timestamp'] = ts
+                    current_row[sig] = val
+                    last_ts = ts
             else:
                 if sig in current_row:
                     current_row[sig] = val
 
         # Flush final
         if current_row:
-            output_rows.append(current_row)
+            if all(v is not None for k, v in current_row.items() if k != 'timestamp'):
+                output_rows.append(current_row)
 
         # 4. Construct Result DataFrame
         res_df = pd.DataFrame(output_rows)

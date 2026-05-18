@@ -246,18 +246,6 @@
                     "title": "Combined",
                     "fields": [
                         {
-                            "binding": "Aceinna_Yaw_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
-                        },
-                        {
-                            "binding": "Aceinna_Roll_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
-                        },
-                        {
-                            "binding": "Aceinna_Pitch_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
-                        },
-                        {
                             "binding": "Aceinna_AccY",
                             "message_id": "ID/PGN: 61485"
                         },
@@ -268,6 +256,18 @@
                         {
                             "binding": "Aceinna_AccX",
                             "message_id": "ID/PGN: 61485"
+                        },
+                        {
+                            "binding": "Aceinna_Yaw_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
+                        },
+                        {
+                            "binding": "Aceinna_Roll_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
+                        },
+                        {
+                            "binding": "Aceinna_Pitch_Angular_Rate",
+                            "message_id": "ID/PGN: 61482"
                         }
                     ],
                     "delimiter": ",",
