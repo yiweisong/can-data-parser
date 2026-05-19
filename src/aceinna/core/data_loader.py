@@ -4,6 +4,12 @@ import os
 from ..models.fetch_rule import DataSourceFetchRule
 from ..utils.hex_parser import parse_hex_string
 
+def self_increasing_generator():
+    n = 0
+    while True:
+        yield n
+        n += 1
+
 class DataLoader:
     @staticmethod
     def load_data(file_path: str, rule: DataSourceFetchRule) -> pd.DataFrame:
@@ -76,6 +82,20 @@ class DataLoader:
         
         # Convert data column to bytes
         selected_df['data'] = selected_df['data'].apply(lambda x: parse_hex_string(str(x)))
+        
+        self_increasing_generator_instance = self_increasing_generator()
+        
+        def parse_timestamp(val):
+            # if val is numeric, keep as is
+            if isinstance(val, (int, float)):
+                return val
+            
+            # if val is string, convert to a self-increase number
+            if isinstance(val, str):
+                return next(self_increasing_generator_instance)
+            
+        
+        selected_df['timestamp'] = selected_df['timestamp'].apply(parse_timestamp)
         
         return selected_df
 
