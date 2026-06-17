@@ -42,12 +42,13 @@ class DropListWidget(QListWidget):
         if event.mimeData().hasText():
             event.acceptProposedAction()
 
-    def add_binding(self, binding: str, msg_id: str = ""):
+    def add_binding(self, binding: str, msg_id: str = "", unit: str = ""):
         # Check if already exists? maybe not needed
         display_text = f"{binding} [{msg_id}]" if msg_id else binding
         item = QListWidgetItem(display_text)
         item.setData(Qt.UserRole, binding)
         item.setData(Qt.UserRole + 1, msg_id)
+        item.setData(Qt.UserRole + 2, unit)
         self.addItem(item)
         
     def dropEvent(self, event):
@@ -59,7 +60,8 @@ class DropListWidget(QListWidget):
                     parts = line.split('|')
                     binding = parts[0]
                     msg_id = parts[1] if len(parts) > 1 else ""
-                    self.add_binding(binding, msg_id)
+                    unit = parts[2] if len(parts) > 2 else ""
+                    self.add_binding(binding, msg_id, unit)
                 else:
                     self.add_binding(line)
         event.acceptProposedAction()
@@ -121,8 +123,9 @@ class PlotRuleEditor(QWidget):
         if rule:
             for y in rule.y_axes:
                 # Assuming y is AxisBinding with potential message_id
-                msg = getattr(y, 'message_id', '') if y else ''
-                self.y_list.add_binding(y.binding, msg)
+                msg = getattr(y, 'message_id', '')
+                unit = getattr(y, 'unit', '')
+                self.y_list.add_binding(y.binding, msg, unit)
         y_layout.addWidget(self.y_list)
         
         # Helper buttons for Y Axis (Delete, Up, Down)
@@ -214,7 +217,8 @@ class PlotRuleEditor(QWidget):
                 binding = item.text()
             
             msg = item.data(Qt.UserRole + 1) or ""
-            y_bindings.append(AxisBinding(binding=binding, message_id=msg))
+            unit = item.data(Qt.UserRole + 2) or ""
+            y_bindings.append(AxisBinding(binding=binding, message_id=msg, unit=unit))
             
         rule.y_axes = y_bindings
         

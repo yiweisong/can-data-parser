@@ -218,15 +218,18 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_Pitch_Angular_Rate",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Roll_Angular_Rate",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Yaw_Angular_Rate",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         }
                     ],
                     "figure_figsize": [
@@ -247,27 +250,33 @@
                     "fields": [
                         {
                             "binding": "Aceinna_AccY",
-                            "message_id": "ID/PGN: 61485"
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccZ",
-                            "message_id": "ID/PGN: 61485"
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccX",
-                            "message_id": "ID/PGN: 61485"
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_Yaw_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Roll_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Pitch_Angular_Rate",
-                            "message_id": "ID/PGN: 61482"
+                            "message_id": "ID/PGN: 61482",
+                            "unit": "deg/s"
                         }
                     ],
                     "delimiter": ",",
@@ -281,15 +290,18 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_Roll_SSI",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61459",
+                            "unit": "deg"
                         },
                         {
                             "binding": "Aceinna_GyroY_SSI",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61459",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Pitch_SSI",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61459",
+                            "unit": "deg"
                         }
                     ],
                     "figure_figsize": [
@@ -311,15 +323,18 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_Yaw_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65387",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Roll_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65387",
+                            "unit": "deg/s"
                         },
                         {
                             "binding": "Aceinna_Pitch_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65387",
+                            "unit": "deg/s"
                         }
                     ],
                     "figure_figsize": [
@@ -341,15 +356,18 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_AccX",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccZ",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccY",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61485",
+                            "unit": "m/s2"
                         }
                     ],
                     "figure_figsize": [
@@ -371,15 +389,18 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_AccX_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65389",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccY_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65389",
+                            "unit": "m/s2"
                         },
                         {
                             "binding": "Aceinna_AccZ_HR",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 65389",
+                            "unit": "m/s2"
                         }
                     ],
                     "figure_figsize": [
@@ -401,11 +422,13 @@
                     "y_axes": [
                         {
                             "binding": "Aceinna_Roll",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61481",
+                            "unit": "deg"
                         },
                         {
                             "binding": "Aceinna_Pitch",
-                            "message_id": ""
+                            "message_id": "ID/PGN: 61481",
+                            "unit": "deg"
                         }
                     ],
                     "figure_figsize": [
@@ -428,9 +451,9 @@
         {
             "name": "CSV Mapping",
             "file_type": "csv",
-            "message_id_col_index": 3,
-            "message_data_col_index": 7,
-            "timestamp_col_index": 0,
+            "message_id_col_index": 5,
+            "message_data_col_index": 9,
+            "timestamp_col_index": 1,
             "ignore_first_row": true
         },
         {

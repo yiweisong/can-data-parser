@@ -132,6 +132,7 @@ Manage Convertors
                     2. Save button. Save the data field.
             2. Delimiter field. The delimiter of the csv file.
             3. Include Header toggle. Whether to include the header in the csv file.
+
 Manage Data File Mappings
 1. A list of data file mappings. Select a data file mapping to edit or delete.
 2. Add button. Add a new data file mapping in a prompt window.

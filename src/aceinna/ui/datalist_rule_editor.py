@@ -39,7 +39,8 @@ class DataListRuleEditor(QWidget):
         if rule:
             for f in rule.fields:
                 msg = getattr(f, 'message_id', '')
-                self.field_list.add_binding(f.binding, msg)
+                unit = getattr(f, 'unit', '')
+                self.field_list.add_binding(f.binding, msg, unit)
         right_layout.addWidget(self.field_list)
 
         # Helper buttons
@@ -112,19 +113,22 @@ class DataListRuleEditor(QWidget):
             item = self.field_list.item(i)
             binding = item.text()
             msg = ""
+            unit = ""
             
             # Use UserRole if present (it should be if added via add_binding or drop)
             if item.data(Qt.UserRole):
                 binding = item.data(Qt.UserRole)
                 msg = item.data(Qt.UserRole + 1) or ""
+                unit = item.data(Qt.UserRole + 2) or ""
             else:
                 # Fallback parsing (e.g. if older items without UserRole exist, but we used add_binding above)
                 if '|' in binding:
                      parts = binding.split('|')
                      binding = parts[0].strip()
                      msg = parts[1].strip() if len(parts) > 1 else ""
+                     unit = parts[2].strip() if len(parts) > 2 else ""
 
-            fields.append(DataListField(binding=binding, message_id=msg))
+            fields.append(DataListField(binding=binding, message_id=msg, unit=unit))
         rule.fields = fields
         
         return rule

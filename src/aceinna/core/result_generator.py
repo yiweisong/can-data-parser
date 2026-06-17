@@ -107,6 +107,10 @@ class ResultGenerator:
                 # If X is provided (e.g. another signal), we scatter or plot signal vs signal.
                 
                 label = y_axis.binding
+                
+                if y_axis.unit:
+                    label += f" ({y_axis.unit})"
+
                 legend_labels.append(label)
                 if x_data is not None:
                     # Align based on timestamp? 
@@ -280,6 +284,16 @@ class ResultGenerator:
         cols = ['timestamp'] + [f.binding for f in rule.fields]
         # Reindex to add missing columns (NaN) and sort
         res_df = res_df.reindex(columns=cols)
+        
+        # Create header with units
+        header_with_units = ['Timestamp']
+        for field in rule.fields:
+            col_name = field.binding
+            if field.unit:
+                col_name += f" ({field.unit})"
+            header_with_units.append(col_name)
+        
+        res_df.columns = header_with_units
         
         # Output
         safe_title = rule.title.replace(' ', '_') if getattr(rule, 'title', '') else f"datalist_{index}"

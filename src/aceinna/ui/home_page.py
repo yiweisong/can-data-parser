@@ -4,9 +4,32 @@ import platform
 from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel, 
                                QComboBox, QPushButton, QLineEdit, QFileDialog, 
                                QProgressBar, QMessageBox)
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QUrl
 from ..core.convert_engine import ConvertWorker
 
+class DragDropLineEdit(QLineEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        # 检查拖拽进来的数据是否包含URL（文件路径）
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+        else:
+            super().dragEnterEvent(event)
+
+    def dropEvent(self, event):
+        # 当文件被放下时，获取文件路径并设置到文本框中
+        if event.mimeData().hasUrls():
+            # 只处理第一个文件
+            url = event.mimeData().urls()[0]
+            if url.isLocalFile():
+                self.setText(url.toLocalFile())
+            event.acceptProposedAction()
+        else:
+            super().dropEvent(event)
+            
 class HomePage(QWidget):
     def __init__(self, config_store):
         super().__init__()
@@ -30,7 +53,7 @@ class HomePage(QWidget):
         
         # 3. Data File Selection
         file_layout = QHBoxLayout()
-        self.line_file_path = QLineEdit()
+        self.line_file_path = DragDropLineEdit()
         self.btn_browse = QPushButton("Browse...")
         self.btn_browse.clicked.connect(self.browse_file)
         file_layout.addWidget(self.line_file_path)

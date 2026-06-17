@@ -92,7 +92,7 @@ class ConfigStore:
                 if rd.get('x_axis'):
                     rule.x_axis = AxisBinding(binding=rd['x_axis']['binding'], message_id=rd['x_axis'].get('message_id', ''))
                 if rd.get('y_axes'):
-                    rule.y_axes = [AxisBinding(binding=yb['binding'], message_id=yb.get('message_id', '')) for yb in rd['y_axes']]
+                    rule.y_axes = [AxisBinding(binding=yb['binding'], message_id=yb.get('message_id', ''), unit=yb.get('unit', '')) for yb in rd['y_axes']]
                 c.convert_rules.append(rule)
             elif rd['type'] == 'data_list':
                 rule = DataListRule(
@@ -102,7 +102,7 @@ class ConfigStore:
                     merge_rule=rd.get('merge_rule', 'Forward Fill')
                 )
                 if rd.get('fields'):
-                    rule.fields = [DataListField(binding=f['binding'], message_id=f.get('message_id', '')) for f in rd['fields']]
+                    rule.fields = [DataListField(binding=f['binding'], message_id=f.get('message_id', ''), unit=f.get('unit', '')) for f in rd['fields']]
                 c.convert_rules.append(rule)
                 
         return c
